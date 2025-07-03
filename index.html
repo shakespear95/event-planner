@@ -22,9 +22,6 @@
             <ul>
                 <li><a href="#">Browse events</a></li>
                 <li><a href="#">Get help</a></li>
-                <li class="login-signup">
-                    <a href="#">Log In / Sign Up</a>
-                </li>
                 <li>
                     <button id="openSearchBtn" class="search-btn">
                         <i class="fas fa-search"></i> Search
@@ -41,18 +38,25 @@
         <ul>
             <li><a href="#">Browse events</a></li>
             <li><a href="#">Get help</a></li>
-            <li><a href="#">Log In / Sign Up</a></li>
             <li><button id="openSearchBtnMobile" class="search-btn-mobile"><i class="fas fa-search"></i> Search Events</button></li>
             <li><button class="close-mobile-menu" id="closeMobileMenu"><i class="fas fa-times"></i> Close</button></li>
         </ul>
     </div>
-
 
     <section class="hero">
         <div class="hero-content">
             <h1>WELCOME TO THE ALTERNATIVE</h1>
             <p>Incredible live shows. Upfront pricing. Relevant recommendations. <br> EventFinder makes finding events easy.</p>
             <button id="heroSearchBtn" class="primary-btn">SEARCH EVENTS</button>
+        </div>
+    </section>
+
+    <section class="featured-events-section">
+        <div class="container">
+            <h2>Featured Events</h2>
+            <div id="featuredEventsContainer" class="event-cards-grid">
+                <p class="loading-message">Loading featured events...</p>
+                </div>
         </div>
     </section>
 
@@ -98,7 +102,7 @@
     <section class="results-section">
         <div class="container">
             <h2>Search Results</h2>
-            <div id="results">
+            <div id="results" class="event-cards-grid">
                 <p class="no-results-message">Your search results will appear here.</p>
             </div>
         </div>
@@ -135,7 +139,7 @@
             </div>
         </div>
     </footer>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script src="script.js"></script>
 </body>
 </html>

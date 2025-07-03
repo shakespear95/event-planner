@@ -1,114 +1,119 @@
-// Get DOM elements (existing ones)
+// Get DOM elements
 const searchModal = document.getElementById('searchModal');
-const openSearchBtn = document.getElementById('openSearchBtn');
-const heroSearchBtn = document.getElementById('heroSearchBtn');
+const openSearchBtn = document.getElementById('openSearchBtn'); // Desktop navbar search button
+const heroSearchBtn = document.getElementById('heroSearchBtn'); // Hero section search button
 const closeModalBtn = document.getElementById('closeModalBtn');
 const eventForm = document.getElementById('eventForm');
-const resultsDiv = document.getElementById('results');
+const resultsDiv = document.getElementById('results'); // Search Results Container
+const featuredEventsContainer = document.getElementById('featuredEventsContainer'); // Featured Events Container
 
-// Mobile menu elements (existing ones)
+// Mobile menu elements
 const menuToggle = document.getElementById('menuToggle');
 const mobileMenu = document.getElementById('mobileMenu');
 const closeMobileMenu = document.getElementById('closeMobileMenu');
 const openSearchBtnMobile = document.getElementById('openSearchBtnMobile');
 
-// New: Login/Signup Button
-const loginSignupBtn = document.querySelector('.login-signup a');
-
-// New: Desktop Search button (for the Q Search text)
-const desktopSearchBtn = document.querySelector('.navbar-right .search-btn');
-
-// --- Supabase Configuration ---
-// Replace with your ACTUAL Supabase Project URL and anon key
-const SUPABASE_URL = 'https://nsdxklohluaakzftstelx.supabase.co'; // Your Project URL
-const SUPABASE_ANON_KEY = 'YOUR_FULL_ANON_PUBLIC_KEY'; // Your full anon public key
-
-// Initialize Supabase client
-const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// --- Authentication Functions ---
-
-// Function to update UI based on auth state
-async function updateAuthUI(session) {
-    if (session) {
-        console.log('User is logged in:', session.user);
-        loginSignupBtn.textContent = 'Sign Out';
-        loginSignupBtn.href = '#'; // Make it an action
-        loginSignupBtn.removeEventListener('click', redirectToLoginSignup);
-        loginSignupBtn.addEventListener('click', signOut);
-        // You might show a "My Profile" link or similar here
+// --- Helper function to render event cards (REUSABLE) ---
+function renderEventCards(containerElement, eventsData, messageIfEmpty) {
+    if (eventsData && eventsData.length > 0) {
+        let eventsHtml = '';
+        eventsData.forEach(event => {
+            eventsHtml += `
+                <div class="event-card">
+                    <h4>${event.name || 'Untitled Event'}</h4>
+                    <p><strong>Description:</strong> ${event.description || 'No description available.'}</p>
+                    <p><strong>Date & Time:</strong> ${event.date || 'To be announced'}</p>
+                    <p><strong>Location:</strong> ${event.location || 'Online/Various'}</p>
+                    <p><strong>Price:</strong> ${event.price || 'Free / N/A'}</p>
+                    ${event.source ? `<p><strong>Source:</strong> <a href="${event.source}" target="_blank" rel="noopener noreferrer">${event.source}</a></p>` : ''}
+                </div>
+            `;
+        });
+        containerElement.innerHTML = eventsHtml;
     } else {
-        console.log('User is not logged in.');
-        loginSignupBtn.textContent = 'Log In / Sign Up';
-        loginSignupBtn.removeEventListener('click', signOut);
-        loginSignupBtn.addEventListener('click', redirectToLoginSignup); // Setup listener for login/signup
+        containerElement.innerHTML = `<p class="no-results-message">${messageIfEmpty}</p>`;
     }
 }
 
-// Handler for the "Log In / Sign Up" button click
-function redirectToLoginSignup(event) {
-    event.preventDefault();
-    // For now, we'll just log and maybe open a simple prompt,
-    // later this will open a dedicated login/signup modal.
-    console.log("Redirecting to login/signup flow... (To be implemented)");
-    // For a real flow, you'd typically open a modal here,
-    // or redirect to a dedicated login page.
-    alert("Login/Signup functionality coming soon! For now, you'll need to create a UI for this.");
-}
+// --- Function to load featured events on page load ---
+async function loadFeaturedEvents() {
+    featuredEventsContainer.innerHTML = '<p class="loading-message">Loading featured events...</p>'; // Initial loading message
 
+    const defaultData = {
+        location: "Liechtenstein", // Default location for featured events
+        activity_type: "Any",
+        timeframe: "This Weekend",
+        radius: "", // No radius for broader search
+        keywords: ""
+    };
 
-async function signOut(event) {
-    event.preventDefault();
+    // Correct the n8n webhook URL if you're using /webhook-test/, otherwise use /webhook/
+    const n8nWebhookUrl = "https://winwinglobal.app.n8n.cloud/webhook/event-finder";
+
     try {
-        const { error } = await supabase.auth.signOut();
-        if (error) throw error;
-        console.log("User signed out successfully.");
-        // The onAuthStateChange listener will handle UI update
+        const response = await fetch(n8nWebhookUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(defaultData)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error loading featured: ${response.status}, message: ${errorText}`);
+        }
+
+        const result = await response.json();
+        const events = result.results ? JSON.parse(result.results) : [];
+
+        renderEventCards(featuredEventsContainer, events, "No featured events found at this time. Try searching!");
+
     } catch (error) {
-        console.error("Error signing out:", error.message);
+        console.error("Error loading featured events:", error);
+        featuredEventsContainer.innerHTML = '<p class="error-message">Could not load featured events. Please try again later.</p>';
     }
 }
 
-// Listen for authentication state changes
-supabase.auth.onAuthStateChange((event, session) => {
-    console.log('Auth event:', event, 'Session:', session);
-    updateAuthUI(session);
-});
 
-// Initial check when the page loads (gets current session)
-supabase.auth.getSession().then(({ data: { session } }) => {
-    updateAuthUI(session);
-});
-
-
-// --- Event Listeners for UI interaction (Existing, with minor adjustments) ---
+// --- Event Listeners for UI interaction ---
 
 // Open search modal from desktop navbar (Q Search)
-desktopSearchBtn.addEventListener('click', () => {
-    searchModal.style.display = 'flex';
-});
+const qSearchButton = document.querySelector('.navbar-right .search-btn');
+if (qSearchButton) { // Check if element exists before adding listener
+    qSearchButton.addEventListener('click', () => {
+        searchModal.style.display = 'flex';
+    });
+}
 
 // Open search modal from desktop navbar (text button)
-openSearchBtn.addEventListener('click', () => {
-    searchModal.style.display = 'flex'; // Use flex for centering
-});
+if (openSearchBtn) {
+    openSearchBtn.addEventListener('click', () => {
+        searchModal.style.display = 'flex'; // Use flex for centering
+    });
+}
 
 // Open search modal from hero section button
-heroSearchBtn.addEventListener('click', () => {
-    searchModal.style.display = 'flex';
-});
+if (heroSearchBtn) {
+    heroSearchBtn.addEventListener('click', () => {
+        searchModal.style.display = 'flex';
+    });
+}
 
 // Open search modal from mobile menu
-openSearchBtnMobile.addEventListener('click', () => {
-    mobileMenu.classList.remove('open'); // Close mobile menu first
-    searchModal.style.display = 'flex';
-});
-
+if (openSearchBtnMobile) {
+    openSearchBtnMobile.addEventListener('click', () => {
+        mobileMenu.classList.remove('open');
+        searchModal.style.display = 'flex';
+    });
+}
 
 // Close search modal
-closeModalBtn.addEventListener('click', () => {
-    searchModal.style.display = 'none';
-});
+if (closeModalBtn) {
+    closeModalBtn.addEventListener('click', () => {
+        searchModal.style.display = 'none';
+    });
+}
 
 // Close modal if clicking outside modal content
 window.addEventListener('click', (event) => {
@@ -118,17 +123,21 @@ window.addEventListener('click', (event) => {
 });
 
 // Mobile menu toggle
-menuToggle.addEventListener('click', () => {
-    mobileMenu.classList.add('open');
-});
+if (menuToggle) {
+    menuToggle.addEventListener('click', () => {
+        mobileMenu.classList.add('open');
+    });
+}
 
 // Close mobile menu
-closeMobileMenu.addEventListener('click', () => {
-    mobileMenu.classList.remove('open');
-});
+if (closeMobileMenu) {
+    closeMobileMenu.addEventListener('click', () => {
+        mobileMenu.classList.remove('open');
+    });
+}
 
 
-// --- Form Submission Logic (unchanged from previous version) ---
+// --- Form Submission Logic ---
 
 eventForm.addEventListener("submit", async function (e) {
     e.preventDefault(); // Prevent default form submission
@@ -148,8 +157,8 @@ eventForm.addEventListener("submit", async function (e) {
     searchModal.style.display = 'none';
 
     try {
-        // IMPORTANT: Replace with your actual n8n webhook Production URL
-        // Ensure this URL is correct and your n8n workflow is active
+        // IMPORTANT: Ensure this is your correct n8n webhook Production URL
+        // And your n8n workflow must be Active
         const response = await fetch("https://winwinglobal.app.n8n.cloud/webhook/event-finder", {
             method: "POST",
             headers: {
@@ -165,28 +174,9 @@ eventForm.addEventListener("submit", async function (e) {
         }
 
         const result = await response.json();
+        const events = result.results ? JSON.parse(result.results) : [];
 
-        // Format and display results
-        if (result.results && result.results !== "[]" && JSON.parse(result.results).length > 0) {
-            const events = JSON.parse(result.results);
-            let eventsHtml = '<h3>Found Events:</h3><div class="event-cards-container">';
-            events.forEach(event => {
-                eventsHtml += `
-                    <div class="event-card">
-                        <h4>${event.name || 'N/A'}</h4>
-                        <p><strong>Description:</strong> ${event.description || 'N/A'}</p>
-                        <p><strong>Date & Time:</strong> ${event.date || 'N/A'}</p>
-                        <p><strong>Location:</strong> ${event.location || 'N/A'}</p>
-                        <p><strong>Price:</strong> ${event.price || 'N/A'}</p>
-                        ${event.source ? `<p><strong>Source:</strong> <a href="${event.source}" target="_blank">${event.source}</a></p>` : ''}
-                    </div>
-                `;
-            });
-            eventsHtml += '</div>';
-            resultsDiv.innerHTML = eventsHtml;
-        } else {
-            resultsDiv.innerHTML = '<p class="no-results-message">No events found matching your criteria. Try broadening your search or adjusting keywords.</p>';
-        }
+        renderEventCards(resultsDiv, events, "No events found matching your criteria. Try broadening your search or adjusting keywords.");
 
     } catch (error) {
         console.error("Error fetching events:", error);
@@ -194,5 +184,9 @@ eventForm.addEventListener("submit", async function (e) {
     }
 });
 
-// Initial message for results div
+// --- Initial Calls ---
+// Initial message for search results div
 resultsDiv.innerHTML = '<p class="no-results-message">Your search results will appear here.</p>';
+
+// Load featured events when the page loads
+loadFeaturedEvents();
