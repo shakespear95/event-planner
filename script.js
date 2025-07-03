@@ -27,8 +27,8 @@ const amplifyConfig = {
         oauth: {
             domain: 'ap-south-1nbngszfof.auth.ap-south-1.amazoncognito.com', // Your Cognito Domain
             scope: ['email', 'profile', 'openid'],
-            redirectSignIn: 'https://shakespear95.github.io/event-finder-frontend/', // Your GitHub Pages URL (Callback URL)
-            redirectSignOut: 'https://shakespear95.github.io/event-finder-frontend/', // Your GitHub Pages URL (Sign-out URL)
+            redirectSignIn: 'https://shakespear95.github.io/event-planner/', // Your GitHub Pages URL (Callback URL)
+            redirectSignOut: 'https://shakespear95.github.io/event-planner/', // Your GitHub Pages URL (Sign-out URL)
             responseType: 'code' // or 'token'
         }
     }
