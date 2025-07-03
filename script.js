@@ -1,21 +1,95 @@
-// Get DOM elements
+// Get DOM elements (existing ones)
 const searchModal = document.getElementById('searchModal');
-const openSearchBtn = document.getElementById('openSearchBtn'); // Desktop navbar search button
-const heroSearchBtn = document.getElementById('heroSearchBtn'); // Hero section search button
+const openSearchBtn = document.getElementById('openSearchBtn');
+const heroSearchBtn = document.getElementById('heroSearchBtn');
 const closeModalBtn = document.getElementById('closeModalBtn');
 const eventForm = document.getElementById('eventForm');
 const resultsDiv = document.getElementById('results');
 
-// Mobile menu elements
+// Mobile menu elements (existing ones)
 const menuToggle = document.getElementById('menuToggle');
 const mobileMenu = document.getElementById('mobileMenu');
 const closeMobileMenu = document.getElementById('closeMobileMenu');
 const openSearchBtnMobile = document.getElementById('openSearchBtnMobile');
 
+// New: Login/Signup Button
+const loginSignupBtn = document.querySelector('.login-signup a'); // Select the <a> tag
+// New: Desktop Search button (for the Q Search text)
+const desktopSearchBtn = document.querySelector('.navbar-right .search-btn'); // Select the button with the search icon and text
 
-// --- Event Listeners for UI interaction ---
+// --- Configure AWS Amplify ---
+// Replace with your ACTUAL Cognito details
+const amplifyConfig = {
+    Auth: {
+        region: 'ap-south-1', // Your AWS region
+        userPoolId: 'ap-south-1_NbcNzaFOF', // Your User Pool ID
+        userPoolWebClientId: '2fl9b2m0shvp912skoodb7qobd', // Your App Client ID
+        oauth: {
+            domain: 'ap-south-1nbngszfof.auth.ap-south-1.amazoncognito.com', // Your Cognito Domain
+            scope: ['email', 'profile', 'openid'],
+            redirectSignIn: 'https://shakespear95.github.io/event-finder-frontend/', // Your GitHub Pages URL (Callback URL)
+            redirectSignOut: 'https://shakespear95.github.io/event-finder-frontend/', // Your GitHub Pages URL (Sign-out URL)
+            responseType: 'code' // or 'token'
+        }
+    }
+};
 
-// Open search modal from desktop navbar
+Amplify.configure(amplifyConfig);
+
+// --- Authentication Functions ---
+
+async function handleAuthRedirect() {
+    try {
+        const currentUser = await Amplify.Auth.currentAuthenticatedUser();
+        console.log('User is logged in:', currentUser);
+        loginSignupBtn.textContent = 'Sign Out';
+        loginSignupBtn.href = '#'; // Make it a button action rather than a link
+        loginSignupBtn.removeEventListener('click', redirectToCognitoSignIn); // Remove old listener
+        loginSignupBtn.addEventListener('click', signOut); // Add signOut listener
+        // Optionally update other UI elements for logged-in state
+    } catch (error) {
+        console.log('User is not logged in:', error);
+        loginSignupBtn.textContent = 'Log In / Sign Up';
+        loginSignupBtn.removeEventListener('click', signOut); // Remove signOut listener if present
+        loginSignupBtn.addEventListener('click', redirectToCognitoSignIn); // Ensure sign-in listener is active
+    }
+}
+
+async function redirectToCognitoSignIn(event) {
+    event.preventDefault(); // Prevent default link behavior
+    // INSERT THE CONSOLE.LOG HERE:
+    console.log("Attempting to redirect to Cognito Hosted UI...");
+    try {
+        await Amplify.Auth.federatedSignIn(); // This redirects to the hosted UI
+    } catch (error) {
+        console.error("Error redirecting to sign in:", error);
+    }
+}
+
+async function signOut(event) {
+    event.preventDefault(); // Prevent default link behavior
+    try {
+        await Amplify.Auth.signOut(); // This clears tokens and redirects to sign-out URL
+        console.log("User signed out successfully.");
+        // After sign out, the handleAuthRedirect will run again on page load
+        // and update the button to "Log In / Sign Up"
+    } catch (error) {
+        console.error("Error signing out:", error);
+    }
+}
+
+// Initial check when the page loads
+handleAuthRedirect();
+
+
+// --- Event Listeners for UI interaction (Existing, with minor adjustments) ---
+
+// Open search modal from desktop navbar (Q Search)
+desktopSearchBtn.addEventListener('click', () => {
+    searchModal.style.display = 'flex';
+});
+
+// Open search modal from desktop navbar (text button)
 openSearchBtn.addEventListener('click', () => {
     searchModal.style.display = 'flex'; // Use flex for centering
 });
@@ -76,7 +150,8 @@ eventForm.addEventListener("submit", async function (e) {
 
     try {
         // IMPORTANT: Replace with your actual n8n webhook Production URL
-        const response = await fetch("https://winwinglobal.app.n8n.cloud/webhook/event-finder", { // Changed to production URL
+        // Ensure this URL is correct and your n8n workflow is active
+        const response = await fetch("https://winwinglobal.app.n8n.cloud/webhook/event-finder", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
