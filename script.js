@@ -13,73 +13,72 @@ const closeMobileMenu = document.getElementById('closeMobileMenu');
 const openSearchBtnMobile = document.getElementById('openSearchBtnMobile');
 
 // New: Login/Signup Button
-const loginSignupBtn = document.querySelector('.login-signup a'); // Select the <a> tag
+const loginSignupBtn = document.querySelector('.login-signup a');
+
 // New: Desktop Search button (for the Q Search text)
-const desktopSearchBtn = document.querySelector('.navbar-right .search-btn'); // Select the button with the search icon and text
+const desktopSearchBtn = document.querySelector('.navbar-right .search-btn');
 
-// --- Configure AWS Amplify ---
-// Replace with your ACTUAL Cognito details
-const amplifyConfig = {
-    Auth: {
-        region: 'ap-south-1', // Your AWS region
-        userPoolId: 'ap-south-1_NbcNzaFOF', // Your User Pool ID
-        userPoolWebClientId: '2fl9b2m0shvp912skoodb7qobd', // Your App Client ID
-        oauth: {
-            domain: 'ap-south-1nbngszfof.auth.ap-south-1.amazoncognito.com', // Your Cognito Domain
-            scope: ['email', 'profile', 'openid'],
-            redirectSignIn: 'https://shakespear95.github.io/event-planner/', // Your GitHub Pages URL (Callback URL)
-            redirectSignOut: 'https://shakespear95.github.io/event-planner/', // Your GitHub Pages URL (Sign-out URL)
-            responseType: 'code' // or 'token'
-        }
-    }
-};
+// --- Supabase Configuration ---
+// Replace with your ACTUAL Supabase Project URL and anon key
+const SUPABASE_URL = 'https://nsdxklohluaakzftstelx.supabase.co'; // Your Project URL
+const SUPABASE_ANON_KEY = 'YOUR_FULL_ANON_PUBLIC_KEY'; // Your full anon public key
 
-Amplify.configure(amplifyConfig);
+// Initialize Supabase client
+const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // --- Authentication Functions ---
 
-async function handleAuthRedirect() {
-    try {
-        const currentUser = await Amplify.Auth.currentAuthenticatedUser();
-        console.log('User is logged in:', currentUser);
+// Function to update UI based on auth state
+async function updateAuthUI(session) {
+    if (session) {
+        console.log('User is logged in:', session.user);
         loginSignupBtn.textContent = 'Sign Out';
-        loginSignupBtn.href = '#'; // Make it a button action rather than a link
-        loginSignupBtn.removeEventListener('click', redirectToCognitoSignIn); // Remove old listener
-        loginSignupBtn.addEventListener('click', signOut); // Add signOut listener
-        // Optionally update other UI elements for logged-in state
-    } catch (error) {
-        console.log('User is not logged in:', error);
+        loginSignupBtn.href = '#'; // Make it an action
+        loginSignupBtn.removeEventListener('click', redirectToLoginSignup);
+        loginSignupBtn.addEventListener('click', signOut);
+        // You might show a "My Profile" link or similar here
+    } else {
+        console.log('User is not logged in.');
         loginSignupBtn.textContent = 'Log In / Sign Up';
-        loginSignupBtn.removeEventListener('click', signOut); // Remove signOut listener if present
-        loginSignupBtn.addEventListener('click', redirectToCognitoSignIn); // Ensure sign-in listener is active
+        loginSignupBtn.removeEventListener('click', signOut);
+        loginSignupBtn.addEventListener('click', redirectToLoginSignup); // Setup listener for login/signup
     }
 }
 
-async function redirectToCognitoSignIn(event) {
-    event.preventDefault(); // Prevent default link behavior
-    // INSERT THE CONSOLE.LOG HERE:
-    console.log("Attempting to redirect to Cognito Hosted UI...");
-    try {
-        await Amplify.Auth.federatedSignIn(); // This redirects to the hosted UI
-    } catch (error) {
-        console.error("Error redirecting to sign in:", error);
-    }
+// Handler for the "Log In / Sign Up" button click
+function redirectToLoginSignup(event) {
+    event.preventDefault();
+    // For now, we'll just log and maybe open a simple prompt,
+    // later this will open a dedicated login/signup modal.
+    console.log("Redirecting to login/signup flow... (To be implemented)");
+    // For a real flow, you'd typically open a modal here,
+    // or redirect to a dedicated login page.
+    alert("Login/Signup functionality coming soon! For now, you'll need to create a UI for this.");
 }
+
 
 async function signOut(event) {
-    event.preventDefault(); // Prevent default link behavior
+    event.preventDefault();
     try {
-        await Amplify.Auth.signOut(); // This clears tokens and redirects to sign-out URL
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
         console.log("User signed out successfully.");
-        // After sign out, the handleAuthRedirect will run again on page load
-        // and update the button to "Log In / Sign Up"
+        // The onAuthStateChange listener will handle UI update
     } catch (error) {
-        console.error("Error signing out:", error);
+        console.error("Error signing out:", error.message);
     }
 }
 
-// Initial check when the page loads
-handleAuthRedirect();
+// Listen for authentication state changes
+supabase.auth.onAuthStateChange((event, session) => {
+    console.log('Auth event:', event, 'Session:', session);
+    updateAuthUI(session);
+});
+
+// Initial check when the page loads (gets current session)
+supabase.auth.getSession().then(({ data: { session } }) => {
+    updateAuthUI(session);
+});
 
 
 // --- Event Listeners for UI interaction (Existing, with minor adjustments) ---
