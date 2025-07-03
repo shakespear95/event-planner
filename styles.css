@@ -1,53 +1,504 @@
+/* Basic Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-bg: #1a1a1a; /* Dark background inspired by DICE.fm */
+    --secondary-bg: #222222;
+    --text-light: #f0f0f0; /* Off-white for general text */
+    --text-dark: #333;
+    --accent-blue: #007bff; /* A clean blue for buttons/highlights */
+    --accent-blue-hover: #0056b3;
+    --border-color: #444;
+}
+
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f3f4f6;
-  margin: 0;
-  padding: 20px;
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--primary-bg);
+    color: var(--text-light);
+    line-height: 1.6;
+    overflow-x: hidden; /* Prevent horizontal scroll due to potential overflow */
 }
 
 .container {
-  max-width: 600px;
-  margin: auto;
-  background: white;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+    color: var(--text-light);
+    margin-bottom: 15px;
 }
 
 h1 {
-  text-align: center;
+    font-size: 4em; /* Very large for hero */
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: -2px;
 }
 
-form label {
-  display: block;
-  margin-top: 15px;
+h2 {
+    font-size: 2.5em;
+    font-weight: 700;
 }
 
-form input,
-form select,
-form button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+p {
+    font-size: 1.1em;
+    margin-bottom: 1em;
 }
 
-form button {
-  margin-top: 20px;
-  background-color: #1f6feb;
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+a {
+    color: var(--text-light);
+    text-decoration: none;
+    transition: color 0.3s ease;
 }
 
-form button:hover {
-  background-color: #155ac1;
+a:hover {
+    color: var(--accent-blue);
+}
+
+/* Buttons */
+.primary-btn {
+    background-color: var(--accent-blue);
+    color: var(--text-light);
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.primary-btn:hover {
+    background-color: var(--accent-blue-hover);
+}
+
+.submit-btn {
+    background-color: var(--accent-blue);
+    color: var(--text-light);
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.submit-btn:hover {
+    background-color: var(--accent-blue-hover);
+}
+
+/* Navbar */
+.navbar {
+    background-color: var(--primary-bg);
+    padding: 15px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar-left .logo {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.8em;
+    font-weight: 700;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+}
+
+.navbar-left .logo i {
+    margin-right: 10px;
+    color: var(--accent-blue);
+}
+
+.navbar-right ul {
+    list-style: none;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-right ul li {
+    margin-left: 30px;
+}
+
+.navbar-right ul li a,
+.navbar-right .search-btn {
+    font-size: 1.1em;
+    color: var(--text-light);
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    white-space: nowrap; /* Prevent wrapping */
+}
+
+.navbar-right .search-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    padding: 8px 15px;
+}
+
+.navbar-right .search-btn:hover {
+    background-color: var(--secondary-bg);
+    border-color: var(--accent-blue);
+}
+
+.navbar-right .login-signup a {
+    color: var(--accent-blue);
+    border: 1px solid var(--accent-blue);
+    padding: 8px 15px;
+    border-radius: 5px;
+}
+
+.navbar-right .login-signup a:hover {
+    background-color: var(--accent-blue);
+    color: var(--primary-bg);
+}
+
+.menu-toggle {
+    display: none; /* Hidden by default, shown on small screens */
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+/* Mobile Menu */
+.mobile-menu {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--primary-bg);
+    z-index: 1001;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transform: translateX(100%); /* Start off-screen */
+    transition: transform 0.3s ease-in-out;
+}
+
+.mobile-menu.open {
+    transform: translateX(0); /* Slide in */
+}
+
+.mobile-menu ul {
+    list-style: none;
+    padding: 0;
+    width: 80%;
+    text-align: center;
+}
+
+.mobile-menu ul li {
+    margin-bottom: 30px;
+}
+
+.mobile-menu ul li a,
+.mobile-menu .search-btn-mobile,
+.mobile-menu .close-mobile-menu {
+    font-size: 1.8em;
+    color: var(--text-light);
+    display: block;
+    padding: 10px 0;
+    border: none;
+    background: none;
+    width: 100%;
+    cursor: pointer;
+}
+
+.mobile-menu .search-btn-mobile,
+.mobile-menu .close-mobile-menu {
+    color: var(--accent-blue);
+}
+
+.mobile-menu .close-mobile-menu {
+    margin-top: 40px;
+    font-size: 1.5em;
+}
+
+
+/* Hero Section */
+.hero {
+    height: 80vh; /* Make it take up most of the viewport height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color: var(--secondary-bg); /* A slightly lighter dark for contrast */
+    padding: 0 20px;
+}
+
+.hero-content {
+    max-width: 800px;
+}
+
+.hero-content h1 {
+    font-size: 5em; /* Even larger for dramatic effect */
+    line-height: 1.1;
+    margin-bottom: 20px;
+}
+
+.hero-content p {
+    font-size: 1.4em;
+    margin-bottom: 40px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Search Modal */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 2000; /* High z-index to overlay everything */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.9); /* Dark overlay */
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px); /* Subtle blur effect */
+}
+
+.modal-content {
+    background-color: var(--secondary-bg);
+    margin: 15% auto; /* Adjust margin for vertical centering */
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    max-width: 500px;
+    width: 90%;
+    position: relative;
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: var(--text-light);
+    font-size: 1.8em;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.modal-close-btn:hover {
+    color: var(--accent-blue);
+}
+
+.modal-content h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2em;
+    color: var(--text-light);
+}
+
+.modal-content form label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-size: 1em;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.modal-content form input[type="text"],
+.modal-content form input[type="number"],
+.modal-content form select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: #333;
+    color: var(--text-light);
+    font-size: 1em;
+}
+
+.modal-content form input::placeholder {
+    color: #888;
+}
+
+/* Results Section */
+.results-section {
+    padding: 50px 0;
+    min-height: 300px; /* Ensure some height even if empty */
+    background-color: var(--primary-bg);
 }
 
 #results {
-  margin-top: 30px;
-  white-space: pre-line;
-  font-family: monospace;
+    background-color: var(--secondary-bg);
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    margin-top: 30px;
+}
+
+.no-results-message {
+    text-align: center;
+    font-style: italic;
+    color: #888;
+    padding: 20px;
+}
+
+/* Footer */
+.footer {
+    background-color: var(--secondary-bg);
+    color: rgba(255, 255, 255, 0.7);
+    padding: 50px 0 20px;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.95em;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+
+.footer-section {
+    flex: 1;
+    min-width: 250px;
+    margin-right: 30px;
+}
+
+.footer-section:last-child {
+    margin-right: 0;
+}
+
+.footer-section h3 {
+    color: var(--text-light);
+    margin-bottom: 20px;
+    font-size: 1.4em;
+}
+
+.footer-section p {
+    line-height: 1.8;
+}
+
+.footer-section ul {
+    list-style: none;
+}
+
+.footer-section ul li {
+    margin-bottom: 10px;
+}
+
+.footer-section ul li a {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.footer-section ul li a:hover {
+    color: var(--accent-blue);
+}
+
+.social-icons a {
+    color: var(--text-light);
+    font-size: 1.5em;
+    margin-right: 15px;
+    transition: color 0.3s ease;
+}
+
+.social-icons a:hover {
+    color: var(--accent-blue);
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+    color: rgba(255, 255, 255, 0.5);
+}
+
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .navbar {
+        padding: 15px 20px;
+    }
+    .hero-content h1 {
+        font-size: 4em;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar-right {
+        display: none; /* Hide desktop nav */
+    }
+    .menu-toggle {
+        display: block; /* Show mobile toggle */
+    }
+
+    .hero {
+        height: 70vh;
+    }
+
+    .hero-content h1 {
+        font-size: 3em;
+    }
+
+    .hero-content p {
+        font-size: 1.2em;
+    }
+
+    .footer-content {
+        flex-direction: column;
+    }
+    .footer-section {
+        margin-right: 0;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    .footer-section:last-child {
+        margin-bottom: 0;
+    }
+    .footer-section ul {
+        padding: 0;
+    }
+    .footer-section ul li {
+        display: inline-block;
+        margin: 0 10px;
+    }
+    .social-icons {
+        justify-content: center;
+        display: flex;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-content h1 {
+        font-size: 2.2em;
+    }
+    .hero-content p {
+        font-size: 1em;
+    }
+    .primary-btn {
+        padding: 10px 20px;
+        font-size: 1em;
+    }
+    .modal-content {
+        padding: 30px 20px;
+    }
+    .modal-content h2 {
+        font-size: 1.6em;
+    }
 }
