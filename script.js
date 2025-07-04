@@ -48,7 +48,7 @@ async function loadFeaturedEvents() {
     };
 
     // Correct the n8n webhook URL if you're using /webhook-test/, otherwise use /webhook/
-    const n8nWebhookUrl = "https://winwinglobal.app.n8n.cloud/webhook/event-finder"; // Removed -test
+    const n8nWebhookUrl = "https://1nnzirx9v5.execute-api.ap-south-1.amazonaws.com/default/EventFinderBackend"; // Removed -test
     try {
         const response = await fetch(n8nWebhookUrl, {
             method: "POST",
