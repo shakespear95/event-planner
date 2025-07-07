@@ -47,10 +47,11 @@ async function loadFeaturedEvents() {
         keywords: ""
     };
 
-    // Correct the n8n webhook URL if you're using /webhook-test/, otherwise use /webhook/
-    const n8nWebhookUrl = "https://1nnzirx9v5.execute-api.ap-south-1.amazonaws.com/default/EventFinderBackend"; // Removed -test
+    // AWS Lambda API Gateway Endpoint
+    const backendApiUrl = "https://1nnzirx9v5.execute-api.ap-south-1.amazonaws.com/default/EventFinderBackend"; 
+
     try {
-        const response = await fetch(n8nWebhookUrl, {
+        const response = await fetch(backendApiUrl, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -64,7 +65,7 @@ async function loadFeaturedEvents() {
         }
 
         const result = await response.json();
-        const events = result.results ? JSON.parse(result.results) : [];
+        const events = result.results ? JSON.parse(result.results) : []; // Assuming backend sends { "results": "JSON_STRING" }
 
         renderEventCards(featuredEventsContainer, events, "No featured events found at this time. Try searching!");
 
@@ -155,10 +156,11 @@ eventForm.addEventListener("submit", async function (e) {
     // Close the modal after submission (optional, but good UX)
     searchModal.style.display = 'none';
 
+    // AWS Lambda API Gateway Endpoint
+    const backendApiUrl = "https://1nnzirx9v5.execute-api.ap-south-1.amazonaws.com/default/EventFinderBackend"; 
+
     try {
-        // IMPORTANT: Ensure this is your correct n8n webhook Production URL
-        // And your n8n workflow must be Active
-        const response = await fetch("https://winwinglobal.app.n8n.cloud/webhook/event-finder", {
+        const response = await fetch(backendApiUrl, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -166,14 +168,13 @@ eventForm.addEventListener("submit", async function (e) {
             body: JSON.stringify(data)
         });
 
-        // Check if the response was successful
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
         }
 
         const result = await response.json();
-        const events = result.results ? JSON.parse(result.results) : [];
+        const events = result.results ? JSON.parse(result.results) : []; // Assuming backend sends { "results": "JSON_STRING" }
 
         renderEventCards(resultsDiv, events, "No events found matching your criteria. Try broadening your search or adjusting keywords.");
 
