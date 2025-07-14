@@ -150,14 +150,15 @@ eventForm.addEventListener("submit", async function (e) {
         activity_type: document.getElementById("activity_type").value,
         timeframe: document.getElementById("timeframe").value,
         radius: document.getElementById("radius").value,
-        keywords: document.getElementById("keywords").value
+        keywords: document.getElementById("keywords").value,
+        email: document.getElementById("email").value // NEW: Get the email from the new input field
     };
 
     // Close the modal after submission (optional, but good UX)
     searchModal.style.display = 'none';
 
     // AWS Lambda API Gateway Endpoint
-    const backendApiUrl = "https://1nnzirx9v5.execute-api.ap-south-1.amazonaws.com/default/EventFinderBackend"; 
+    const backendApiUrl = "https://5iooxf2g0f.execute-api.ap-south-1.amazonaws.com/default"; 
 
     try {
         const response = await fetch(backendApiUrl, {
