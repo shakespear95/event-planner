@@ -48,7 +48,7 @@ async function loadFeaturedEvents() {
     };
 
     // AWS Lambda API Gateway Endpoint
-    const backendApiUrl = "https://1nnzirx9v5.execute-api.ap-south-1.amazonaws.com/default/EventFinderBackend"; 
+    const backendApiUrl = "https://5iooxf2g0f.execute-api.ap-south-1.amazonaws.com/default"; 
 
     try {
         const response = await fetch(backendApiUrl, {
